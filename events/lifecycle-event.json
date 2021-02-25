@@ -1,0 +1,20 @@
+{
+    "version": "0",
+    "id": "8d2d9ad8-13ab-f8e2-342a-5ee0f6753e7a",
+    "detail-type": "EC2 Instance-launch Lifecycle Action",
+    "source": "aws.autoscaling",
+    "account": "235431990733",
+    "time": "2021-02-23T17:53:19Z",
+    "region": "us-east-1",
+    "resources": [
+        "arn:aws:autoscaling:us-east-1:235431990733:autoScalingGroup:f761ff2e-a8ed-4e30-9b27-043b4da050c3:autoScalingGroupName/Teste"
+    ],
+    "detail": {
+        "LifecycleActionToken": "f04b1e0b-928f-4430-8a9e-ac8e3bed25e8",
+        "AutoScalingGroupName": "Teste",
+        "LifecycleHookName": "InstanceLaunched",
+        "EC2InstanceId": "i-0eb07c2cb35005665",
+        "LifecycleTransition": "autoscaling:EC2_INSTANCE_LAUNCHING",
+        "NotificationMetadata": "InstanceLaunchedGreco"
+    }
+}

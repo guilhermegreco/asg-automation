@@ -1,0 +1,7 @@
+{
+    "Parameters": {
+      "TagName": "ServerName",
+      "LogLevel" : "DEBUG",
+      "LogsRetentionInDays": 3
+    }
+  }

@@ -1,0 +1,74 @@
+{
+    "version": "0",
+    "id": "113f0d4d-ff68-3497-730a-7e97299ad158",
+    "detail-type": "AWS API Call via CloudTrail",
+    "source": "aws.ec2",
+    "account": "235431990733",
+    "time": "2021-02-23T17:39:18Z",
+    "region": "us-east-1",
+    "resources": [],
+    "detail": {
+        "eventVersion": "1.08",
+        "userIdentity": {
+            "type": "AssumedRole",
+            "principalId": "AROATNUGXCXGTJIFU6DAL:guilhermegreco",
+            "arn": "arn:aws:sts::235431990733:assumed-role/AWSReservedSSO_AWSAdministratorAccess_2c435d08075ca338/guilhermegreco",
+            "accountId": "235431990733",
+            "accessKeyId": "ASIATNUGXCXGVTH5NDR3",
+            "sessionContext": {
+                "sessionIssuer": {
+                    "type": "Role",
+                    "principalId": "AROATNUGXCXGTJIFU6DAL",
+                    "arn": "arn:aws:iam::235431990733:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_2c435d08075ca338",
+                    "accountId": "235431990733",
+                    "userName": "AWSReservedSSO_AWSAdministratorAccess_2c435d08075ca338"
+                },
+                "webIdFederationData": {},
+                "attributes": {
+                    "mfaAuthenticated": "false",
+                    "creationDate": "2021-02-23T17:05:01Z"
+                }
+            }
+        },
+        "eventTime": "2021-02-23T17:39:18Z",
+        "eventSource": "ec2.amazonaws.com",
+        "eventName": "StopInstances",
+        "awsRegion": "us-east-1",
+        "sourceIPAddress": "72.21.198.65",
+        "userAgent": "console.ec2.amazonaws.com",
+        "requestParameters": {
+            "instancesSet": {
+                "items": [
+                    {
+                        "instanceId": "i-07aea367cd99c3368"
+                    }
+                ]
+            },
+            "force": false
+        },
+        "responseElements": {
+            "requestId": "388a4835-a4b0-41d8-ac38-66b71e5381e6",
+            "instancesSet": {
+                "items": [
+                    {
+                        "instanceId": "i-07aea367cd99c3368",
+                        "currentState": {
+                            "code": 64,
+                            "name": "stopping"
+                        },
+                        "previousState": {
+                            "code": 16,
+                            "name": "running"
+                        }
+                    }
+                ]
+            }
+        },
+        "requestID": "388a4835-a4b0-41d8-ac38-66b71e5381e6",
+        "eventID": "542815d8-e639-4c45-bfa6-277b0bc5ed9d",
+        "readOnly": false,
+        "eventType": "AwsApiCall",
+        "managementEvent": true,
+        "eventCategory": "Management"
+    }
+}

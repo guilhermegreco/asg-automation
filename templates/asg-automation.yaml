@@ -1,0 +1,148 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Autoscaling Group Automation'
+Transform: 'AWS::Serverless-2016-10-31'
+Parameters:
+  TagName:
+    Type: 'String'
+    Default: 'ServerName'  
+  LogLevel:
+    Type: 'String'
+    Default: 'INFO' 
+  LogsRetentionInDays:
+    Type: 'Number'
+    Default: 3
+
+Resources:
+  TerminateEC2AutoscalingGroup:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Description: Terminate Instances in the ASG
+      Code: ../src/
+      Handler: 'terminate-asg.lambda_handler'
+      MemorySize: 128
+      Role: !GetAtt LambdaServiceRole.Arn
+      Runtime: 'python3.7'
+      Timeout: 300
+      Environment:
+        Variables:
+          ACTION: 'down'
+          LOG_LEVEL: !Ref LogLevel
+
+  LambdaLogGroupTerminateASG:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${TerminateEC2AutoscalingGroup}'
+      RetentionInDays: !Ref LogsRetentionInDays      
+
+  StartEC2AutoscalingGroup:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Description: Start Instances in the ASG
+      Code: ../src/
+      Handler: 'start-asg.lambda_handler'
+      MemorySize: 128
+      Role: !GetAtt LambdaServiceRole.Arn
+      Runtime: 'python3.7'
+      Timeout: 300
+      Environment:
+        Variables:
+          ACTION: 'up'
+          LOG_LEVEL: !Ref LogLevel
+
+  LambdaLogGroupStartASG:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${StartEC2AutoscalingGroup}'
+      RetentionInDays: !Ref LogsRetentionInDays            
+
+  AttachENI:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Description: Attach ENI during Autoscaling Lifecycle Event
+      Code: ../src/
+      Handler: 'attach-eni.lambda_handler'
+      MemorySize: 128
+      Role: !GetAtt LambdaServiceRole.Arn
+      Runtime: 'python3.7'
+      Timeout: 300
+      Environment:
+        Variables:
+          TAG_NAME: !Ref TagName
+          LOG_LEVEL: !Ref LogLevel
+
+  LambdaLogGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${AttachENI}'
+      RetentionInDays: !Ref LogsRetentionInDays      
+
+  EventRuleAttachENI:
+    Type: AWS::Lambda::Permission
+    Properties: 
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt AttachENI.Arn
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt ASGLifecycleEventRule.Arn
+
+  LambdaManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties: 
+      Description: 'Customer Managed Policy for Lambda'
+      Path: / 
+      PolicyDocument: 
+        Version: 2012-10-17
+        Statement:
+          - Sid: AllowDescribeAutoscalingGroup                          
+            Effect: Allow
+            Action: 
+              - autoscaling:DescribeLifecycleHooks
+              - autoscaling:DescribeTags
+              - autoscaling:PutLifecycleHook
+              - autoscaling:UpdateAutoScalingGroup
+              - autoscaling:DescribeAutoScalingGroups
+              - autoscaling:CompleteLifecycleAction
+            Resource:
+              - '*'                            
+          - Sid: AllowENIActions                          
+            Effect: Allow
+            Action: 
+              - ec2:AttachNetworkInterface
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DescribeInstances
+            Resource:
+              - '*'                                          
+
+  LambdaServiceRole: 
+    Type: "AWS::IAM::Role"
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - Effect: "Allow"
+            Principal: 
+              Service: 
+                - 'lambda.amazonaws.com'
+            Action: 
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - !Ref LambdaManagedPolicy
+
+
+  ASGLifecycleEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Change Tags
+      Targets:
+        - Arn: !GetAtt AttachENI.Arn
+          Id: target-id1
+      EventPattern:
+        {
+          "source": [
+            "aws.autoscaling"
+            ],
+          "detail-type": [
+            "EC2 Instance-launch Lifecycle Action"
+            ]
+        }      
